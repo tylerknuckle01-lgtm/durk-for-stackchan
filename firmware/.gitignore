@@ -1,5 +1,5 @@
 tmp/
-components/
+# components/  (Durk keeps a local esp-wifi-connect override here)
 managed_components/
 build/
 dist/
