@@ -66,33 +66,40 @@ To start on boot, add `start-durk.ps1` to Task Scheduler ("At log on").
 ## 7. Flash the robot
 Plug the CoreS3 into USB. Find its COM port in Device Manager (e.g. `COM7`).
 
-**Option A — prebuilt image** (if you have `durk-full.bin`; it must point at your PC — see note):
+**Option A — prebuilt image (easiest).** Download `durk-full.bin` from the Releases page, then:
 ```
 python -m esptool --chip esp32s3 -p COM7 -b 921600 erase-flash
 python -m esptool --chip esp32s3 -p COM7 -b 921600 write-flash 0x0 durk-full.bin
 ```
+The prebuilt image uses UTC time on the robot's clock display; the server's `DURK_TZ` still makes
+reminders and answers use your time zone. Build it yourself (Option B) to change the robot's own clock.
 
-**Option B — build it yourself** (needed so the robot knows your PC's IP):
+**Option B — build it yourself.**
 ```
 cd firmware
 cp sdkconfig.durk sdkconfig
 idf.py menuconfig
 ```
-In menuconfig set:
-- `CONFIG_OTA_URL` = `http://YOUR_PC_IP:8003/xiaozhi/ota/`
+In menuconfig you can set:
+- `CONFIG_OTA_URL` = `http://YOUR_PC_IP:8003/xiaozhi/ota/` (optional — you can also type the address on the setup page)
 - `CONFIG_DURK_TZ` = your POSIX time zone, e.g. `EST5EDT,M3.2.0,M11.1.0` (Eastern),
   `CST6CDT,M3.2.0,M11.1.0` (Central), `MST7MDT,M3.2.0,M11.1.0` (Mountain), `PST8PDT,M3.2.0,M11.1.0` (Pacific)
 
 Then `idf.py build` and flash with the "Full" command in [README.md](README.md#flash).
 After the first full flash you can update with the faster "App only" command.
 
-> Note: the robot also learns the server address from the OTA reply, but the OTA URL itself is baked in,
-> so a prebuilt image only works if it was built with your IP (or you enter it on the Wi-Fi setup page).
+## 8. Connect the robot to Wi-Fi and your server
+After flashing, the robot opens a hotspot named `Xiaozhi-XXXX`.
+1. Join it from your phone. The setup page opens (if not, browse to `http://192.168.4.1`).
+2. Pick your home Wi-Fi (2.4 GHz) and enter the password.
+3. In **Server address**, type your PC's IP from step 3, e.g. `192.168.1.20`.
+   You can also paste the full `ws://192.168.1.20:8000/xiaozhi/v1/` from your config — the robot
+   works out the rest (it talks to your PC on port 8003 first, which tells it the 8000 address).
+4. Tap Connect. The robot restarts, connects to your PC, and says hello.
 
-## 8. Connect the robot to Wi-Fi
-After flashing, the robot opens a hotspot named `Xiaozhi-XXXX`. Join it from your phone, follow the
-setup page, choose your home Wi-Fi (2.4 GHz) and enter the password. Leave the OTA field blank if you
-built with your IP. The robot restarts, connects to your PC, and says hello.
+To change the server later, get back to the setup page (the robot reopens the hotspot when it can't join
+Wi-Fi; otherwise run the `erase-flash` + flash steps again) and type a new address.
+Leaving the field empty keeps the address the firmware was built with.
 
 ## 9. Optional: Google Calendar
 1. In https://console.cloud.google.com create a project, enable the **Google Calendar API**
@@ -112,7 +119,7 @@ job type, tech, status, due…). Leave it unset to keep job tools off.
 ## Troubleshooting
 | Problem | Fix |
 |---|---|
-| Robot says it can't connect / shows server error | Server running? Same Wi-Fi? IP correct in config + firmware? Firewall ports 8000/8003 open? |
+| Robot says it can't connect / shows server error | Server running? Same Wi-Fi? Right IP in the setup page's Server address and in `data\.config.yaml`? Firewall ports 8000/8003 open? |
 | Boot loops after flashing | Do a full erase + full flash. Make sure you used the 16 MB settings in the README. |
 | `esptool` can't find the port | Use a data USB cable; hold the reset button while plugging in; check Device Manager. |
 | Durk hears you but never answers | Check `server.err` for an xAI error (wrong key or no credit). |

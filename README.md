@@ -22,13 +22,14 @@ firmware/   full modified xiaozhi-esp32 v2.5.2 tree (build output excluded)
 server/     files added/changed in xiaozhi-esp32-server v0.9.7 (main/xiaozhi-server)
   upstream-changes.patch  diff of modified upstream files
   config.template.yaml    copy to data/.config.yaml and fill in
+  components/esp-wifi-connect  local copy of 78/esp-wifi-connect 3.3.x (MIT, Terrence) with a Server address field
 tools/      helper scripts (galaxy background generator)
 ```
 
 ## Settings you will change
 | Setting | Where | Default |
 |---|---|---|
-| Server address | `CONFIG_OTA_URL` (firmware), `server.websocket` / `vision_explain` (config) | `YOUR_PC_IP` |
+| Server address | Wi-Fi setup page "Server address" field (saved on the robot); `CONFIG_OTA_URL` is the fallback; `server.websocket` / `vision_explain` in config | `YOUR_PC_IP` |
 | xAI API key | `server/data/.config.yaml` | `YOUR_XAI_API_KEY` |
 | Time zone (server) | `DURK_TZ` environment variable (IANA name, e.g. `America/Chicago`) | `UTC` |
 | Time zone (robot) | `CONFIG_DURK_TZ` (POSIX string, e.g. `CST6CDT,M3.2.0,M11.1.0`) | `UTC0` |

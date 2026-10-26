@@ -6,6 +6,8 @@ kept with any copy or prebuilt firmware you share.
 - **xiaozhi-esp32** (firmware base) — https://github.com/78/xiaozhi-esp32 — MIT.
   Full license also in `firmware/LICENSE`.
 - **xiaozhi-esp32-server** (server base) — https://github.com/xinnan-tech/xiaozhi-esp32-server — MIT.
+- **esp-wifi-connect** (78/esp-wifi-connect, Wi-Fi setup page) — MIT, Copyright (c) 2024 Terrence.
+  A modified copy (adds a Server address field) is in `firmware/components/esp-wifi-connect` with its LICENSE.
 - **ESP-IDF**, esp-dl and other Espressif / managed components pulled at build time — Apache-2.0
   or MIT; see each component's own license file.
 - **Stack-chan** — the robot design by Shinya Ishikawa (meganetaaan) and the Stack-chan community,
