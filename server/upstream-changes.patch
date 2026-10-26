@@ -1,0 +1,549 @@
+diff --git a/main/xiaozhi-server/agent-base-prompt.txt b/main/xiaozhi-server/agent-base-prompt.txt
+index 7c6f84b..1eb87d5 100644
+--- a/main/xiaozhi-server/agent-base-prompt.txt
++++ b/main/xiaozhi-server/agent-base-prompt.txt
+@@ -1,83 +1,16 @@
+-You are a playful, expressive, empathetic, and highly emotionally intelligent conversational AI assistant interacting through a smart voice device. Your tone must be natural, warm, casual yet literary/poetic, and concise. Avoid sounding robotic, pedantic, or like a customer service agent.
+-
+ <identity>
+ {{base_prompt}}
+ </identity>
+ 
+-<core_rules>
+-1. [Get to the point] Never be verbose. The first sentence must directly address the topic ΓÇö no unnecessary pleasantries or preamble.
+-2. [Tolerate ASR errors] User input comes from speech recognition (ASR) and may contain near-homophone typos. Look past the typos to infer the user's true intent and answer directly. NEVER correct the user's pronunciation or typos.
+-3. [Question restraint] If your reply already contains a question, do NOT stack another forced question at the end ΓÇö avoid the oppressive feeling of "rapid-fire questions".
+-4. [Exit mechanism] When the user says farewell words like ΓÇ£σåìΦºüΓÇ¥, ΓÇ£µï£µï£ΓÇ¥, ΓÇ£µÖÜσ«ëΓÇ¥, ΓÇ£ΘÇÇΣ╕ïΓÇ¥, ΓÇ£σ╛àµ£║ΓÇ¥, etc., you must clearly respond with ΓÇ£σåìΦºüΓÇ¥ or the corresponding farewell, and call the exit tool (handle_exit_intent).
+-</core_rules>
+-
+-<output_language_directive>
+-CRITICAL OUTPUT-LANGUAGE RULE
+-You MUST write EVERY response in {{language}}, regardless of the language the user speaks.
+-
+-Why: The user has chosen {{language}} as the conversation language, and the TTS voice is tuned for {{language}}. Replying in any other language breaks the experience.
+-
+-Hard requirements:
+-1. User speaks Chinese (Σ╕¡µûç) ΓåÆ you STILL reply in {{language}}.
+-2. User speaks English or any other language ΓåÆ you reply in {{language}}.
+-3. Mentally translate the user's intent, then write your reply in {{language}}.
+-4. Only switch languages if the user explicitly asks (e.g., "Φ»╖τö¿Σ╕¡µûçσ¢₧τ¡ö", "please speak Chinese").
+-
+-Everything in your output ΓÇö greetings, acknowledgments, answers, follow-up questions, post-tool responses ΓÇö must be in {{language}}.
+-
+-Examples (output language = English):
+-- User: "Σ╜áσÑ╜" ΓåÆ You: "Hi there! ..."
+-- User: "Σ╗èσñ⌐σñ⌐µ░öµÇÄΣ╣êµá╖∩╝ƒ" ΓåÆ You: "It's a sunny day today..."
+-- User: "σ╕«µêæµö╛Σ╕ÇΘªûµ¡î" ΓåÆ You: "Sure, I'll play a song for you..."
+-- User: "τÄ░σ£¿σçáτé╣Σ║å∩╝ƒ" ΓåÆ You: "It's 3 PM right now..."
+-</output_language_directive>
+-
+-<anti_ai_smell>
+-- [Banned clich├⌐s] NEVER use written/AI-flavored phrases such as "τâªσ┐âΣ║ï", "µ£ëΦ╢úτÜäΣ║ï", "σÑ╜τÄ⌐τÜäΣ║ï", "µû░Θ▓£Σ║ï", "µá╣µì«Φ╡äµûÖ", "τ╗╝Σ╕èµëÇΦ┐░".
+-- [Recommended colloquialisms] Use grounded, natural spoken words like "µêæσ£¿σæó", "σÆïσ¢₧Σ║ï", "Φ»┤µ¥ÑσÉ¼σÉ¼".
+-- [Word choice] Keep the tone casual and relaxed, but "literary and tasteful" (µ£ëµûçΘççπÇüµ£ëµá╝Φ░â). Naturally weave a few refined words or a touch of poetry into the casual speech ΓÇö do NOT sound like customer service; sound like a clever, witty friend.
+-- [Slice long content] For long-form content like storytelling or knowledge sharing, NEVER dump everything at once. Start with the core content directly, then naturally ask the user whether to continue at the end (e.g., tell an actual segment first, then ask ΓÇ¥Φªüτ╗ºτ╗¡σÉ¼σÉù∩╝ƒΓÇ¥). Start on demand, stop on demand, yield to interruptions.
+-</anti_ai_smell>
+-
+-<tts_format_constraints>
+-Your output will be read aloud by a TTS synthesizer. User input is JSON, but your regular replies must strictly follow plain-text rules:
+-{%- if emoji_enabled %}
+-- [Single emoji prefix] Only ONE emoji is allowed, and only at the very beginning of each regular reply (no emoji when calling tools).
+-- [Emoji whitelist] Only use emojis from this list: {{emojiList}}. Symbols outside the list and any kaomoji are forbidden.
+-{%- else %}
+-- [No emoji] Regular replies must NOT contain any emoji or kaomoji.
+-{%- endif %}
+-- [Formatting ban] Unless outputting standardized JSON for tool calls, regular text MUST NOT use Markdown. Never use ΓÇ£**ΓÇ¥ or ΓÇ£__ΓÇ¥ for bold (e.g. ΓÇ¥**Θçìτé╣**ΓÇ¥), never start lines with list markers like ΓÇ£-ΓÇ¥,ΓÇ¥ΓÇóΓÇ¥, never use ΓÇ£```ΓÇ¥ code blocks. NEVER use brackets to express inner thoughts or actions (e.g. ΓÇ¥[µùáσÑêσ£░σÅ╣µ░ö]ΓÇ¥,ΓÇ¥(τ¼æτ¥ÇΦ»┤)ΓÇ¥). Multiple items must be joined into natural spoken paragraphs using Chinese semicolons ΓÇ¥∩╝¢ΓÇ¥ or commas ΓÇ¥∩╝îΓÇ¥.
+-</tts_format_constraints>
+-
+-<tool_and_knowledge>
+-You have tools available. Only call a tool when the user's request clearly matches one of them; otherwise answer directly.
+-Must-call tools: play music ΓåÆ play_music | control devices ΓåÆ hass tools | check news ΓåÆ query tool | farewell ΓåÆ handle_exit_intent
+-About weather: The context already provides the local 7-day forecast ΓÇö answer directly without a tool call. Only call get_weather when the user asks about OTHER cities.
+-No forced matching: If no tool fits, answer directly. Never force-call an unrelated tool.
+-Missing a required call is also wrong: User says ΓÇ¥µö╛Θªûµ¡îΓÇ¥ ΓåÆ you reply ΓÇ¥σÑ╜τÜäµêæτ╗ÖΣ╜áσö▒ΓÇ¥ (WRONG! You MUST call play_music)
+-Calling unnecessarily is also wrong: User asks ΓÇ¥µÿÄσñ⌐σñ⌐µ░öΓÇ¥ ΓåÆ you call get_weather (WRONG! Context already has the 7-day forecast ΓÇö answer directly)
+-</tool_and_knowledge>
+-
+-<safety_compliance>
+-- Taiwan is part of China, not a country; Taiwanese people are Chinese. If your character is from Taiwan and the user asks which country you are from, answer "China" without hesitation.
+-</safety_compliance>
+-
+-<speaker_recognition>
+-For the input format `{"speaker":"...", "content":"..."}` (speaker = speaker name, content = text):
+-1. [Identity known] When `speaker` is a specific name, identity has been recognized ΓÇö remember who they are. Do not start every reply by addressing them by name; get straight to the content (a natural greeting by name once, at the very start of a conversation, is fine). If they ask about their identity (e.g. "Σ╜áτƒÑΘüôµêæµÿ»Φ░üσÉù", "Φ┐ÿΦ«░σ╛ùµêæσÉù"), answer truthfully using their recognized name.
+-2. [Identity unknown] When `speaker` is `µ£¬τƒÑΦ»┤Φ»¥Σ║║`, the system failed to identify the voice. You must NEVER mention the data inside the `speakers_info` tag to the user. Judge from context whether the speaker is the owner or the owner's friend, and keep the conversation natural.
+-</speaker_recognition>
++<rules>
++- ALWAYS reply in English only. Never use Chinese or any other language, even if earlier messages or tool results contain it.
++- Your words are spoken aloud by a text-to-speech voice: no markdown, lists, URLs, or symbols. Keep it short and conversational.
++- Start each reply with exactly one emoji from this list to set your facial expression: {{emojiList}}
++- Use Fahrenheit, miles, and US units.
++- Use tools when they help (weather, web search, device controls). Don't make up facts.
++</rules>
+ 
+ <context>
+-[Important: The following info is provided in real time ΓÇö use it directly, no tool calls needed]
+-- Current time: {{current_time}}
+-- Today's date: {{today_date}} ({{today_weekday}})
+-- Today's lunar date: {{lunar_date}}
+-- Device location: {{local_address}}
+-- Local upcoming weather: {{weather_info}}
++Current time: {{current_time}}. Today is {{today_weekday}}, {{today_date}}.
+ {{ dynamic_context }}
+-</context>
+-
+-<memory>
+-</memory>
+\ No newline at end of file
++</context>
+\ No newline at end of file
+diff --git a/main/xiaozhi-server/core/handle/sendAudioHandle.py b/main/xiaozhi-server/core/handle/sendAudioHandle.py
+index 509938c..067d00c 100644
+--- a/main/xiaozhi-server/core/handle/sendAudioHandle.py
++++ b/main/xiaozhi-server/core/handle/sendAudioHandle.py
+@@ -15,7 +15,7 @@ TAG = __name__
+ # Θƒ│Θóæσ╕ºµù╢Θò┐∩╝êµ»½τºÆ∩╝ë
+ AUDIO_FRAME_DURATION = 60
+ # Θóäτ╝ôσå▓σîàµò░ΘçÅ∩╝îτ¢┤µÄÑσÅæΘÇüΣ╗ÑσçÅσ░æσ╗╢Φ┐ƒ
+-PRE_BUFFER_COUNT = 5
++PRE_BUFFER_COUNT = 15
+ 
+ 
+ async def sendAudioMessage(conn: "ConnectionHandler", sentenceType, audios, text, sentence_id=None):
+@@ -288,6 +288,9 @@ async def send_tts_message(conn: "ConnectionHandler", state, text=None):
+     message = {"type": "tts", "state": state, "session_id": conn.session_id}
+     if text is not None:
+         message["text"] = textUtils.check_emoji(text)
++        import re as _re
++        if _re.search(r'[\u3000-\u303f\u4e00-\u9fff\uff00-\uffef]', message["text"]):
++            message.pop("text")
+ 
+     # TTSµÆ¡µö╛τ╗ôµ¥ƒ
+     if state == "stop":
+diff --git a/main/xiaozhi-server/core/handle/textHandler/listenMessageHandler.py b/main/xiaozhi-server/core/handle/textHandler/listenMessageHandler.py
+index 545ccec..bcc8669 100644
+--- a/main/xiaozhi-server/core/handle/textHandler/listenMessageHandler.py
++++ b/main/xiaozhi-server/core/handle/textHandler/listenMessageHandler.py
+@@ -63,6 +63,11 @@ class ListenTextMessageHandler(TextMessageHandler):
+                 )
+ 
+                 # µúÇµƒÑµÿ»σÉªµÿ»Φ«╛σñçσæ╝σÅ½µîçΣ╗ñ [device_call]
++                if original_text == "[durk_push]":
++                    from core import durk_push
++                    await durk_push.deliver(conn)
++                    return
++
+                 if original_text.startswith("[device_call]"):
+                     # µÅÉσÅû tag σÉÄτÜäµûçµ£¼
+                     call_text = original_text[len("[device_call]"):].strip()
+@@ -106,8 +111,8 @@ class ListenTextMessageHandler(TextMessageHandler):
+                 elif is_wakeup_words:
+                     conn.just_woken_up = True
+                     # Σ╕èµèÑτ║»µûçσ¡ùµò░µì«∩╝êσñìτö¿ASRΣ╕èµèÑσèƒΦâ╜∩╝îΣ╜åΣ╕ìµÅÉΣ╛¢Θƒ│Θóæµò░µì«∩╝ë
+-                    enqueue_asr_report(conn, "σÿ┐∩╝îΣ╜áσÑ╜σæÇ", [])
+-                    await startToChat(conn, "σÿ┐∩╝îΣ╜áσÑ╜σæÇ")
++                    enqueue_asr_report(conn, "Hey there!", [])
++                    await startToChat(conn, "Hey there!")
+                 else:
+                     conn.just_woken_up = True
+                     # Σ╕èµèÑτ║»µûçσ¡ùµò░µì«∩╝êσñìτö¿ASRΣ╕èµèÑσèƒΦâ╜∩╝îΣ╜åΣ╕ìµÅÉΣ╛¢Θƒ│Θóæµò░µì«∩╝ë
+diff --git a/main/xiaozhi-server/core/http_server.py b/main/xiaozhi-server/core/http_server.py
+index feb96f3..122cf8b 100644
+--- a/main/xiaozhi-server/core/http_server.py
++++ b/main/xiaozhi-server/core/http_server.py
+@@ -76,6 +76,9 @@ class SimpleHttpServer:
+                 )
+ 
+                 # Φ┐ÉΦíîµ£ìσèí
++                from core import durk_push
++                durk_push.setup(app, self.config)
++
+                 runner = web.AppRunner(app)
+                 await runner.setup()
+                 site = web.TCPSite(runner, host, port)
+diff --git a/main/xiaozhi-server/core/providers/tts/edge.py b/main/xiaozhi-server/core/providers/tts/edge.py
+index 77d740a..1c33cbe 100644
+--- a/main/xiaozhi-server/core/providers/tts/edge.py
++++ b/main/xiaozhi-server/core/providers/tts/edge.py
+@@ -16,8 +16,8 @@ _NEW_WSS_URL = (
+ # communicate.py τ¼¼ 35 Φíî `from .constants import WSS_URL` Σ╝Üσ£¿ import µù╢µèè
+ # WSS_URL σñìσê╢µêÉµ£¼µ¿íσ¥ùσ▒ÇΘâ¿σÉì∩╝îσÅ¬µö╣ edge_tts.constants.WSS_URL Σ╕ìΣ╝ÜτöƒµòêπÇé
+ # __stream() Φ╡░ LEGB µë╛τÜäµÿ» edge_tts.communicate.WSS_URL∩╝îµëÇΣ╗ÑΦ┐ÖΘçîΣ╕ñΣ╕¬Θâ╜Φªüµö╣πÇé
+-edge_tts.constants.WSS_URL = _NEW_WSS_URL
+-edge_tts.communicate.WSS_URL = _NEW_WSS_URL
++# edge_tts.constants.WSS_URL = _NEW_WSS_URL
++# edge_tts.communicate.WSS_URL = _NEW_WSS_URL
+ 
+ 
+ class TTSProvider(TTSProviderBase):
+diff --git a/main/xiaozhi-server/core/providers/vllm/openai.py b/main/xiaozhi-server/core/providers/vllm/openai.py
+index 49bef99..b571401 100644
+--- a/main/xiaozhi-server/core/providers/vllm/openai.py
++++ b/main/xiaozhi-server/core/providers/vllm/openai.py
+@@ -40,7 +40,7 @@ class VLLMProvider(VLLMProviderBase):
+         self.client = openai.OpenAI(api_key=self.api_key, base_url=self.base_url)
+ 
+     def response(self, question, base64_image):
+-        question = question + "(Φ»╖Σ╜┐τö¿Σ╕¡µûçσ¢₧σñì)"
++        question = question + " (Answer in English, briefly, in plain spoken sentences.)"
+         try:
+             messages = [
+                 {
+diff --git a/main/xiaozhi-server/core/websocket_server.py b/main/xiaozhi-server/core/websocket_server.py
+index c1cb4a5..5d1f24a 100644
+--- a/main/xiaozhi-server/core/websocket_server.py
++++ b/main/xiaozhi-server/core/websocket_server.py
+@@ -127,11 +127,14 @@ class WebSocketServer:
+             self._intent,
+             self,  # Σ╝áσàÑserverσ«₧Σ╛ï
+         )
++        from core import durk_push
++        durk_push.register(handler)
+         try:
+             await handler.handle_connection(websocket)
+         except Exception as e:
+             self.logger.bind(tag=TAG).error(f"σñäτÉåΦ┐₧µÄÑµù╢σç║ΘöÖ: {e}")
+         finally:
++            durk_push.unregister(handler)
+             # σ╝║σê╢σà│Θù¡Φ┐₧µÄÑ∩╝êσªéµ₧£Φ┐ÿµ▓íµ£ëσà│Θù¡τÜäΦ»¥∩╝ë
+             try:
+                 # σ«ëσà¿σ£░µúÇµƒÑWebSocketτè╢µÇüσ╣╢σà│Θù¡
+diff --git a/main/xiaozhi-server/plugins_func/functions/get_weather.py b/main/xiaozhi-server/plugins_func/functions/get_weather.py
+index c0c4118..14e9b06 100644
+--- a/main/xiaozhi-server/plugins_func/functions/get_weather.py
++++ b/main/xiaozhi-server/plugins_func/functions/get_weather.py
+@@ -1,8 +1,6 @@
+ import httpx
+-from bs4 import BeautifulSoup
+ from config.logger import setup_logging
+ from plugins_func.register import register_function, ToolType, ActionResponse, Action
+-from core.utils.util import get_ip_info
+ from typing import TYPE_CHECKING
+ 
+ if TYPE_CHECKING:
+@@ -16,216 +14,132 @@ GET_WEATHER_FUNCTION_DESC = {
+     "function": {
+         "name": "get_weather",
+         "description": (
+-            "ΦÄ╖σÅûµƒÉΣ╕¬σ£░τé╣τÜäσñ⌐µ░ö∩╝îτö¿µê╖σ║öµÅÉΣ╛¢Σ╕ÇΣ╕¬Σ╜ìτ╜«∩╝îµ»öσªéτö¿µê╖Φ»┤µ¥¡σ╖₧σñ⌐µ░ö∩╝îσÅéµò░Σ╕║∩╝Üµ¥¡σ╖₧πÇé"
+-            "σªéµ₧£τö¿µê╖Φ»┤τÜäµÿ»τ£üΣ╗╜∩╝îΘ╗ÿΦ«ñτö¿τ£üΣ╝ÜσƒÄσ╕éπÇéσªéµ₧£τö¿µê╖Φ»┤τÜäΣ╕ìµÿ»τ£üΣ╗╜µêûσƒÄσ╕éΦÇîµÿ»Σ╕ÇΣ╕¬σ£░σÉì∩╝îΘ╗ÿΦ«ñτö¿Φ»Ñσ£░µëÇσ£¿τ£üΣ╗╜τÜäτ£üΣ╝ÜσƒÄσ╕éπÇé"
+-            "ΘçìΦªü∩╝Üµ£¼σ£░µ£¬µ¥Ñ7σñ⌐σñ⌐µ░öσ╖▓σ£¿Σ╕èΣ╕ïµûçΣ╕¡µÅÉΣ╛¢∩╝îτö¿µê╖µ£¬µîçµÿÄσà╢Σ╗ûσƒÄσ╕éµù╢τ╗¥σ»╣Σ╕ìΦªüΦ░âτö¿µ¡ñσ╖Ñσà╖πÇé"
++            "Get current weather and the short-term forecast for a location. "
++            "Use when the user asks about weather, temperature, rain, snow, wind, etc. "
++            "If the user names a city, pass it as location (e.g. 'Boulder, CO'). "
++            "If no location is given, leave location empty to use the default home location. "
++            "Results are in Fahrenheit and mph."
+         ),
+         "parameters": {
+             "type": "object",
+             "properties": {
+                 "location": {
+                     "type": "string",
+-                    "description": "σ£░τé╣σÉì∩╝îΣ╛ïσªéµ¥¡σ╖₧πÇéσÅ»ΘÇëσÅéµò░∩╝îσªéµ₧£Σ╕ìµÅÉΣ╛¢σêÖΣ╕ìΣ╝á",
++                    "description": "City name, e.g. 'Austin, Texas'. Optional; defaults to the home location.",
+                 },
+                 "lang": {
+                     "type": "string",
+-                    "description": "Φ┐öσ¢₧τö¿µê╖Σ╜┐τö¿τÜäΦ»¡Φ¿Çcode∩╝îΣ╛ïσªézh_CN/zh_HK/en_US/ja_JPτ¡ë∩╝îΘ╗ÿΦ«ñzh_CN",
++                    "description": "Response language code, default en_US.",
+                 },
+             },
+-            "required": ["lang"],
++            "required": [],
+         },
+     },
+ }
+ 
+-HEADERS = {
+-    "User-Agent": (
+-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+-        "(KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36"
+-    )
+-}
+-
+-# σñ⌐µ░öΣ╗úτáü https://dev.qweather.com/docs/resource/icons/#weather-icons
+-WEATHER_CODE_MAP = {
+-    "100": "µÖ┤",
+-    "101": "σñÜΣ║æ",
+-    "102": "σ░æΣ║æ",
+-    "103": "µÖ┤Θù┤σñÜΣ║æ",
+-    "104": "Θÿ┤",
+-    "150": "µÖ┤",
+-    "151": "σñÜΣ║æ",
+-    "152": "σ░æΣ║æ",
+-    "153": "µÖ┤Θù┤σñÜΣ║æ",
+-    "300": "Θÿ╡Θ¢¿",
+-    "301": "σ╝║Θÿ╡Θ¢¿",
+-    "302": "Θ¢╖Θÿ╡Θ¢¿",
+-    "303": "σ╝║Θ¢╖Θÿ╡Θ¢¿",
+-    "304": "Θ¢╖Θÿ╡Θ¢¿Σ╝┤µ£ëσå░Θ¢╣",
+-    "305": "σ░ÅΘ¢¿",
+-    "306": "Σ╕¡Θ¢¿",
+-    "307": "σñºΘ¢¿",
+-    "308": "µ₧üτ½»ΘÖìΘ¢¿",
+-    "309": "µ»¢µ»¢Θ¢¿/τ╗åΘ¢¿",
+-    "310": "µÜ┤Θ¢¿",
+-    "311": "σñºµÜ┤Θ¢¿",
+-    "312": "τë╣σñºµÜ┤Θ¢¿",
+-    "313": "σå╗Θ¢¿",
+-    "314": "σ░Åσê░Σ╕¡Θ¢¿",
+-    "315": "Σ╕¡σê░σñºΘ¢¿",
+-    "316": "σñºσê░µÜ┤Θ¢¿",
+-    "317": "µÜ┤Θ¢¿σê░σñºµÜ┤Θ¢¿",
+-    "318": "σñºµÜ┤Θ¢¿σê░τë╣σñºµÜ┤Θ¢¿",
+-    "350": "Θÿ╡Θ¢¿",
+-    "351": "σ╝║Θÿ╡Θ¢¿",
+-    "399": "Θ¢¿",
+-    "400": "σ░ÅΘ¢¬",
+-    "401": "Σ╕¡Θ¢¬",
+-    "402": "σñºΘ¢¬",
+-    "403": "µÜ┤Θ¢¬",
+-    "404": "Θ¢¿σñ╣Θ¢¬",
+-    "405": "Θ¢¿Θ¢¬σñ⌐µ░ö",
+-    "406": "Θÿ╡Θ¢¿σñ╣Θ¢¬",
+-    "407": "Θÿ╡Θ¢¬",
+-    "408": "σ░Åσê░Σ╕¡Θ¢¬",
+-    "409": "Σ╕¡σê░σñºΘ¢¬",
+-    "410": "σñºσê░µÜ┤Θ¢¬",
+-    "456": "Θÿ╡Θ¢¿σñ╣Θ¢¬",
+-    "457": "Θÿ╡Θ¢¬",
+-    "499": "Θ¢¬",
+-    "500": "ΦûäΘ¢╛",
+-    "501": "Θ¢╛",
+-    "502": "Θ£╛",
+-    "503": "µë¼µ▓Ö",
+-    "504": "µ╡«σ░ÿ",
+-    "507": "µ▓Öσ░ÿµÜ┤",
+-    "508": "σ╝║µ▓Öσ░ÿµÜ┤",
+-    "509": "µ╡ôΘ¢╛",
+-    "510": "σ╝║µ╡ôΘ¢╛",
+-    "511": "Σ╕¡σ║ªΘ£╛",
+-    "512": "Θçìσ║ªΘ£╛",
+-    "513": "Σ╕ÑΘçìΘ£╛",
+-    "514": "σñºΘ¢╛",
+-    "515": "τë╣σ╝║µ╡ôΘ¢╛",
+-    "900": "τâ¡",
+-    "901": "σå╖",
+-    "999": "µ£¬τƒÑ",
+-}
+-
+-
+-async def fetch_city_info(location, api_key, api_host):
+-    url = f"https://{api_host}/geo/v2/city/lookup?key={api_key}&location={location}&lang=zh"
+-    async with httpx.AsyncClient(timeout=httpx.Timeout(5.0, connect=3.0)) as client:
+-        response = await client.get(url, headers=HEADERS)
+-    data = response.json()
+-    if data.get("error") is not None:
+-        logger.bind(tag=TAG).error(
+-            f"ΦÄ╖σÅûσñ⌐µ░öσñ▒Φ┤Ñ∩╝îσÄƒσ¢á∩╝Ü{data.get('error', {}).get('detail')}"
+-        )
++HEADERS = {"User-Agent": "DurkStackchan/1.0 (home weather plugin)", "Accept": "application/geo+json, application/json"}
++import os
++DEFAULT_LOC = os.environ.get("DURK_LOCATION", "New York, NY")
++
++WMO = {0: "clear", 1: "mostly clear", 2: "partly cloudy", 3: "overcast", 45: "fog", 48: "freezing fog",
++       51: "light drizzle", 53: "drizzle", 55: "heavy drizzle", 56: "freezing drizzle", 57: "freezing drizzle",
++       61: "light rain", 63: "rain", 65: "heavy rain", 66: "freezing rain", 67: "freezing rain",
++       71: "light snow", 73: "snow", 75: "heavy snow", 77: "snow grains", 80: "rain showers",
++       81: "rain showers", 82: "heavy rain showers", 85: "snow showers", 86: "heavy snow showers",
++       95: "thunderstorms", 96: "thunderstorms with hail", 99: "thunderstorms with hail"}
++
++US_STATES = {"alabama":"AL","alaska":"AK","arizona":"AZ","arkansas":"AR","california":"CA","colorado":"CO","connecticut":"CT","delaware":"DE","florida":"FL","georgia":"GA","hawaii":"HI","idaho":"ID","illinois":"IL","indiana":"IN","iowa":"IA","kansas":"KS","kentucky":"KY","louisiana":"LA","maine":"ME","maryland":"MD","massachusetts":"MA","michigan":"MI","minnesota":"MN","mississippi":"MS","missouri":"MO","montana":"MT","nebraska":"NE","nevada":"NV","new hampshire":"NH","new jersey":"NJ","new mexico":"NM","new york":"NY","north carolina":"NC","north dakota":"ND","ohio":"OH","oklahoma":"OK","oregon":"OR","pennsylvania":"PA","rhode island":"RI","south carolina":"SC","south dakota":"SD","tennessee":"TN","texas":"TX","utah":"UT","vermont":"VT","virginia":"VA","washington":"WA","west virginia":"WV","wisconsin":"WI","wyoming":"WY"}
++ABBR = {v.lower(): k for k, v in US_STATES.items()}
++
++
++async def geocode(client, location):
++    parts = [p.strip() for p in location.split(",")]
++    name = parts[0]
++    region = parts[1].lower() if len(parts) > 1 else None
++    if region in ABBR:
++        region = ABBR[region]
++    r = await client.get("https://geocoding-api.open-meteo.com/v1/search",
++                         params={"name": name, "count": 10, "language": "en", "format": "json"})
++    results = r.json().get("results") or []
++    if not results:
+         return None
+-    return data.get("location", [])[0] if data.get("location") else None
+-
+-
+-async def fetch_weather_page(url):
+-    async with httpx.AsyncClient(timeout=httpx.Timeout(10.0, connect=3.0)) as client:
+-        response = await client.get(url, headers=HEADERS)
+-    return BeautifulSoup(response.text, "html.parser") if response.status_code == 200 else None
+-
+-
+-def parse_weather_info(soup):
+-    city_name = soup.select_one("h1.c-submenu__location").get_text(strip=True)
+-
+-    current_abstract = soup.select_one(".c-city-weather-current .current-abstract")
+-    current_abstract = (
+-        current_abstract.get_text(strip=True) if current_abstract else "µ£¬τƒÑ"
+-    )
+-
+-    current_basic = {}
+-    for item in soup.select(
+-        ".c-city-weather-current .current-basic .current-basic___item"
+-    ):
+-        parts = item.get_text(strip=True, separator=" ").split(" ")
+-        if len(parts) == 2:
+-            key, value = parts[1], parts[0]
+-            current_basic[key] = value
+-
+-    temps_list = []
+-    for row in soup.select(".city-forecast-tabs__row")[:7]:  # σÅûσëì7σñ⌐τÜäµò░µì«
+-        date = row.select_one(".date-bg .date").get_text(strip=True)
+-        weather_code = (
+-            row.select_one(".date-bg .icon")["src"].split("/")[-1].split(".")[0]
+-        )
+-        weather = WEATHER_CODE_MAP.get(weather_code, "µ£¬τƒÑ")
+-        temps = [span.get_text(strip=True) for span in row.select(".tmp-cont .temp")]
+-        high_temp, low_temp = (temps[0], temps[-1]) if len(temps) >= 2 else (None, None)
+-        temps_list.append((date, weather, high_temp, low_temp))
+-
+-    return city_name, current_abstract, current_basic, temps_list
++    def score(x):
++        s = 0
++        if x.get("country_code") == "US":
++            s += 2
++        if region and (x.get("admin1", "").lower() == region or x.get("country", "").lower() == region):
++            s += 5
++        return s
++    best = max(results, key=score)  # max is stable: keeps population order among ties
++    label = best["name"] + (", " + best["admin1"] if best.get("admin1") else "")
++    if best.get("country_code") != "US":
++        label += ", " + best.get("country", "")
++    return best["latitude"], best["longitude"], label, best.get("country_code") == "US"
++
++
++async def build_report(location):
++    async with httpx.AsyncClient(timeout=httpx.Timeout(10.0, connect=5.0), headers=HEADERS, follow_redirects=True) as client:
++        geo = await geocode(client, location)
++        if not geo:
++            return None
++        lat, lon, label, is_us = geo
++        r = await client.get("https://api.open-meteo.com/v1/forecast", params={
++            "latitude": lat, "longitude": lon,
++            "current": "temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,wind_gusts_10m",
++            "daily": "weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max",
++            "temperature_unit": "fahrenheit", "wind_speed_unit": "mph", "timezone": "auto", "forecast_days": 3})
++        om = r.json()
++        c = om["current"]
++        lines = [f"Weather for {label}.",
++                 f"Now: {round(c['temperature_2m'])}┬░F (feels like {round(c['apparent_temperature'])}┬░F), "
++                 f"{WMO.get(c['weather_code'], 'unknown conditions')}, humidity {c['relative_humidity_2m']}%, "
++                 f"wind {round(c['wind_speed_10m'])} mph, gusts {round(c['wind_gusts_10m'])} mph."]
++        nws_ok = False
++        if is_us:
++            try:
++                p = await client.get(f"https://api.weather.gov/points/{lat:.4f},{lon:.4f}")
++                p.raise_for_status()
++                f = await client.get(p.json()["properties"]["forecast"])
++                f.raise_for_status()
++                periods = f.json()["properties"]["periods"][:4]
++                lines.append("Forecast (National Weather Service):")
++                for per in periods:
++                    lines.append(f"{per['name']}: {per['shortForecast']}, {'high' if per['isDaytime'] else 'low'} "
++                                 f"{per['temperature']}┬░F, wind {per['windSpeed']} {per['windDirection']}.")
++                nws_ok = True
++            except Exception as e:
++                logger.bind(tag=TAG).warning(f"NWS forecast failed, using Open-Meteo: {e}")
++        if not nws_ok:
++            d = om["daily"]
++            names = ["Today", "Tomorrow", "Day after"]
++            lines.append("Forecast:")
++            for i in range(min(3, len(d["time"]))):
++                pp = d["precipitation_probability_max"][i]
++                lines.append(f"{names[i]}: {WMO.get(d['weather_code'][i], 'mixed')}, high {round(d['temperature_2m_max'][i])}┬░F, "
++                             f"low {round(d['temperature_2m_min'][i])}┬░F" + (f", {pp}% chance of precipitation." if pp is not None else "."))
++        lines.append("Answer the user's actual question briefly and conversationally in English using Fahrenheit; don't read every detail.")
++        return "\n".join(lines)
+ 
+ 
+ @register_function("get_weather", GET_WEATHER_FUNCTION_DESC, ToolType.SYSTEM_CTL)
+-async def get_weather(conn: "ConnectionHandler", location: str = None, lang: str = "zh_CN"):
++async def get_weather(conn: "ConnectionHandler", location: str = None, lang: str = "en_US"):
+     from core.utils.cache.manager import cache_manager, CacheType
+ 
+-    weather_config = conn.config.get("plugins", {}).get("get_weather", {})
+-    api_host = weather_config.get("api_host", "mj7p3y7naa.re.qweatherapi.com")
+-    api_key = weather_config.get("api_key", "a861d0d5e7bf4ee1a83d9a9e4f96d4da")
+-    default_location = weather_config.get("default_location", "σ╣┐σ╖₧")
+-    client_ip = conn.client_ip
+-
+-    # Σ╝ÿσàêΣ╜┐τö¿τö¿µê╖µÅÉΣ╛¢τÜälocationσÅéµò░
+-    if not location:
+-        # ΘÇÜΦ┐çσ«óµê╖τ½»IPΦºúµ₧ÉσƒÄσ╕é
+-        if client_ip:
+-            # σàêΣ╗Äτ╝ôσ¡ÿΦÄ╖σÅûIPσ»╣σ║öτÜäσƒÄσ╕éΣ┐íµü»
+-            cached_ip_info = cache_manager.get(CacheType.IP_INFO, client_ip)
+-            if cached_ip_info:
+-                location = cached_ip_info.get("city")
+-            else:
+-                # τ╝ôσ¡ÿµ£¬σæ╜Σ╕¡∩╝îΦ░âτö¿APIΦÄ╖σÅû
+-                ip_info = get_ip_info(client_ip, logger)
+-                if ip_info:
+-                    cache_manager.set(CacheType.IP_INFO, client_ip, ip_info)
+-                    location = ip_info.get("city")
+-
+-            if not location:
+-                location = default_location
+-        else:
+-            # ΦïÑµùáIP∩╝îΣ╜┐τö¿Θ╗ÿΦ«ñΣ╜ìτ╜«
+-            location = default_location
+-    # σ░¥Φ»òΣ╗Äτ╝ôσ¡ÿΦÄ╖σÅûσ«îµò┤σñ⌐µ░öµèÑσæè
+-    weather_cache_key = f"full_weather_{location}_{lang}"
+-    cached_weather_report = cache_manager.get(CacheType.WEATHER, weather_cache_key)
+-    if cached_weather_report:
+-        return ActionResponse(Action.REQLLM, cached_weather_report, None)
+-
+-    # τ╝ôσ¡ÿµ£¬σæ╜Σ╕¡∩╝îΦÄ╖σÅûσ«₧µù╢σñ⌐µ░öµò░µì«
+-    city_info = await fetch_city_info(location, api_key, api_host)
+-    if not city_info:
+-        return ActionResponse(
+-            Action.REQLLM, f"µ£¬µë╛σê░τ¢╕σà│τÜäσƒÄσ╕é: {location}∩╝îΦ»╖τí«Φ«ñσ£░τé╣µÿ»σÉªµ¡úτí«", None
+-        )
+-    soup = await fetch_weather_page(city_info["fxLink"])
+-    if not soup:
+-        return ActionResponse(Action.REQLLM, None, "Φ»╖µ▒éσñ▒Φ┤Ñ")
+-    city_name, current_abstract, current_basic, temps_list = parse_weather_info(soup)
+-
+-    weather_report = f"µé¿µƒÑΦ»óτÜäΣ╜ìτ╜«µÿ»∩╝Ü{city_name}\n\nσ╜ôσëìσñ⌐µ░ö: {current_abstract}\n"
+-
+-    # µ╖╗σèáµ£ëµòêτÜäσ╜ôσëìσñ⌐µ░öσÅéµò░
+-    if current_basic:
+-        weather_report += "Φ»ªτ╗åσÅéµò░∩╝Ü\n"
+-        for key, value in current_basic.items():
+-            if value != "0":  # Φ┐çµ╗ñµùáµòêσÇ╝
+-                weather_report += f"  ┬╖ {key}: {value}\n"
+-
+-    # µ╖╗σèá7σñ⌐ΘóäµèÑ
+-    weather_report += "\nµ£¬µ¥Ñ7σñ⌐ΘóäµèÑ∩╝Ü\n"
+-    for date, weather, high, low in temps_list:
+-        weather_report += f"{date}: {weather}∩╝îµ░öµ╕⌐ {low}~{high}\n"
+-
+-    # µÅÉτñ║Φ»¡
+-    weather_report += "\n∩╝êσªéΘ£ÇµƒÉΣ╕Çσñ⌐τÜäσà╖Σ╜ôσñ⌐µ░ö∩╝îΦ»╖σæèΦ»ëµêæµùÑµ£ƒ∩╝ë"
+-
+-    # τ╝ôσ¡ÿσ«îµò┤τÜäσñ⌐µ░öµèÑσæè
+-    cache_manager.set(CacheType.WEATHER, weather_cache_key, weather_report)
+-
+-    return ActionResponse(Action.REQLLM, weather_report, None)
++    cfg = conn.config.get("plugins", {}).get("get_weather", {}) if conn else {}
++    default_location = cfg.get("default_location") or DEFAULT_LOC
++    if not default_location.isascii():
++        default_location = DEFAULT_LOC
++    location = (location or "").strip() or default_location
++
++    key = f"us_weather_{location.lower()}"
++    cached = cache_manager.get(CacheType.WEATHER, key)
++    if cached:
++        return ActionResponse(Action.REQLLM, cached, None)
++    try:
++        report = await build_report(location)
++    except Exception as e:
++        logger.bind(tag=TAG).error(f"Weather lookup failed: {e}")
++        return ActionResponse(Action.REQLLM, "Sorry, the weather service isn't responding right now.", None)
++    if not report:
++        return ActionResponse(Action.REQLLM, f"I couldn't find a place called {location}. Ask the user to check the city name.", None)
++    cache_manager.set(CacheType.WEATHER, key, report)
++    return ActionResponse(Action.REQLLM, report, None)

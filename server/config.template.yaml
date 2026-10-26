@@ -1,0 +1,71 @@
+server:
+  ip: 0.0.0.0
+  port: 8000
+  http_port: 8003
+  websocket: ws://YOUR_PC_IP:8000/xiaozhi/v1/
+  vision_explain: http://YOUR_PC_IP:8003/mcp/vision/explain
+prompt: |
+  You are Durk, a friendly desk assistant living in a Stack-chan robot. (Optional: add a sentence about yourself, your job and interests here.)
+  Talk like a knowledgeable friend: plain words, short spoken answers, key answer first, no fluff. Always reply in English. Keep replies to one to three sentences unless asked for more. Your name is Durk; speech recognition often writes it as Dirk, Derek, or similar. Treat those as your name and never correct the user about how your name is spelled or said.
+selected_module:
+  VAD: SileroVAD
+  ASR: FunASR
+  LLM: XaiLLM
+  TTS: XaiTTS
+  Memory: nomem
+  Intent: function_call
+  VLLM: XaiVLLM
+LLM:
+  XaiLLM:
+    type: openai
+    model_name: grok-4.7
+    url: https://api.x.ai/v1
+    api_key: "YOUR_XAI_API_KEY"
+ASR:
+  FunASR:
+    type: fun_local
+    model_dir: models/SenseVoiceSmall
+    output_dir: tmp/
+    language: en
+TTS:
+  XaiTTS:
+    type: xai
+    api_key: "YOUR_XAI_API_KEY"
+    voice: rex            # male voices: rex, atlas, orion, leo, sal, ... (GET /v1/tts/voices)
+    language: en
+    speed: 1.0
+    normalize: true
+    fallback_voice: en-US-GuyNeural
+    output_dir: tmp/
+  EdgeTTS:
+    type: edge
+    voice: en-US-GuyNeural
+    output_dir: tmp/
+
+VAD:
+  SileroVAD:
+    type: silero
+    threshold: 0.5
+    threshold_low: 0.3
+    model_dir: models/snakers4_silero-vad
+    min_silence_duration_ms: 800
+Intent:
+  function_call:
+    type: function_call
+    functions:
+      - change_role
+      - web_search
+      - get_weather
+      - get_news_from_newsnow
+      - play_music
+      - set_reminder
+      - get_schedule
+      - get_jobs
+      - add_job
+VLLM:
+  XaiVLLM:
+    type: openai
+    model_name: grok-4.7
+    url: https://api.x.ai/v1
+    api_key: "YOUR_XAI_API_KEY"
+    max_tokens: 300

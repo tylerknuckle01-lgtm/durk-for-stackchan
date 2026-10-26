@@ -1,0 +1,30 @@
+{
+    "manufacturer": "m5stack",
+    "type": "m5stack-core-s3",
+    "target": "esp32s3",
+    "builds": [
+        {
+            "name": "m5stack-core-s3",
+            "build_options": {
+                "camera_hmirror": false,
+                "camera_vflip": false
+            },
+            "sdkconfig_append": [
+                "CONFIG_SPIRAM_MODE_QUAD=y",
+                "CONFIG_CAMERA_GC0308=y",
+                "CONFIG_CAMERA_GC0308_AUTO_DETECT_DVP_INTERFACE_SENSOR=y",
+                "CONFIG_CAMERA_GC0308_DVP_YUV422_320X240_20FPS=y",
+                "CONFIG_LANGUAGE_EN_US=y",
+                "CONFIG_LANGUAGE_ZH_CN=n",
+                "CONFIG_OTA_URL=\"http://YOUR_PC_IP:8003/xiaozhi/ota/\"",
+                "CONFIG_USE_AFE_WAKE_WORD=n",
+                "CONFIG_USE_CUSTOM_WAKE_WORD=y",
+                "CONFIG_CUSTOM_WAKE_WORD=\"hey dirk\"",
+                "CONFIG_CUSTOM_WAKE_WORD_DISPLAY=\"Dirk\"",
+                "CONFIG_SR_MN_EN_NONE=n",
+                "CONFIG_SR_MN_EN_MULTINET7_QUANT=y",
+                "CONFIG_SR_WN_WN9_NIHAOXIAOZHI_TTS=n"
+            ]
+        }
+    ]
+}

@@ -1,0 +1,28 @@
+# build output
+build/
+firmware/build/
+firmware/managed_components/
+firmware/dependencies.lock
+*.bin
+*.elf
+*.map
+# secrets — never commit
+.config.yaml
+**/data/.config.yaml
+google_client.json
+google_token.json
+**/data/durk_reminders.json
+*.pem
+*.key
+.env
+# backups / flash dumps
+*.bak
+*.pre-*
+stackchan-backup/
+full-before-*.bin
+# python / misc
+__pycache__/
+*.pyc
+venv/
+tmp/
+*.log
