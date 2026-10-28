@@ -7,6 +7,9 @@ using xAI Grok for the brain and voice.
 
 **New here? Start with [SETUP.md](SETUP.md).**
 
+## Want the easy route?
+The firmware and guide here are free. The paid **Durk for Stack-chan: Complete Setup Bundle** adds extra face themes, sound packs, personality presets, and optional 30 days of message support: https://knuckletyler.gumroad.com/l/iciyo ($19 basic, $39 with support).
+
 ## Features
 - Animated Stack-chan face with lip sync, plus themes (classic, galaxy, more in `server/data/faces`)
 - Head servos (yaw/pitch), face tracking with the camera, idle glances
